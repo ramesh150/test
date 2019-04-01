@@ -1,0 +1,48 @@
+$( document ).ready(function() {
+	$( function() {$( ".datepicker" ).datepicker({	changeMonth: true, changeYear: true,dateFormat: 'yy-mm-dd' });} );
+	$('#refresh').click( function() {
+		
+		$('#loading-mask').text('Loading...');
+		$('#loading-mask').removeClass('error');
+		$('#loading-mask').show();
+			var data = {date_from: $('#from_date').val()};
+						data.date_to=$('#to_date').val();
+						
+			$.ajax(
+					{	url: '/CaseStatus/tracklog/taillog',
+						data: data,dataType: 'text',
+						cache: false,
+						success: function(data) 
+						{
+								if(data.indexOf('TrackerError')==-1) 
+									{
+										$('#loading-mask').hide();
+										$('#logText').html(data);
+										$('#logText').get(0).scrollTop = $('#logText').get(0).scrollHeight;
+									} else 
+									{
+										$('#loading-mask').addClass('error');
+										$('#loading-mask').text('Error: Check the log manually');
+									}
+								 	
+						},
+						
+					});
+	
+	    });
+});
+function myFunction(id) {
+	  var dots = document.getElementById("dots"+id);
+	  var moreText = document.getElementById("more"+id);
+	  var btnText = document.getElementById(id+"myBtn");
+
+	  if (dots.style.display === "none") {
+	    dots.style.display = "inline";
+	    btnText.innerHTML = "View more"; 
+	    moreText.style.display = "none";
+	  } else {
+	    dots.style.display = "none";
+	    btnText.innerHTML = "Read less"; 
+	    moreText.style.display = "inline";
+	  }
+	}			
