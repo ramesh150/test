@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration packages="com.scc.casestatus.logger">
+  <Appenders>
+
+    <!-- Console Appender -->
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss a} %x{HOST_INFO} %-5level %logger{36} - %msg%n" />
+    </Console>
+
+    <!-- JDBC Appender -->
+    <JDBC name="MySQLDatabase" tableName="APP_LOGS">
+         <ConnectionFactory class="com.scc.casestatus.logger.ConnectionFactory" method="getConnection" />
+         <Column name="LOG_ID" pattern="%u" />
+         <Column name="ENTRY_DATE" isEventTimestamp="true" />
+         <Column name="LOGGER" pattern="%logger" />
+         <Column name="LOG_LEVEL" pattern="%level" />
+         <Column name="MESSAGE" pattern="%m" />
+         <Column name="EXCEPTION" pattern="%throwable " />
+         <!-- <Column name="host_info" pattern="%x{HOST_INFO}" />
+         <Column name="user_name" pattern="%x{user_name}" />
+         <Column name="error_type" pattern="%x{error_type}" /> -->
+    </JDBC>
+   
+   <!-- RollingFile Appender -->
+	<RollingFile name="RollingFile" 
+        fileName="/home/rameshchandra/workspace/CaseStatus/log/special-CaseStatus.html" 
+        filePattern="/home/rameshchandra/workspace/CaseStatus/log/special-%d{yyyy-MM-dd HH:mm}.%i.html" 
+        createOnDemand="true" append="true">
+    	<!-- <PatternLayout>
+              <pattern>%d %p %c{1.} [%t] %m%n</pattern>
+        </PatternLayout> -->
+        <!-- <HTMLLayout charset="UTF-8" title="CaseStatusLogs"/> -->
+        <CustomHtmlLayout />
+    	<Policies>
+    		<TimeBasedTriggeringPolicy interval="1" />
+	    </Policies>
+    	<DefaultRolloverStrategy max="100" >
+		    	<Delete basePath="/home/rameshchandra/workspace/CaseStatus/log">
+		      		<IfFileName glob="special-*.html" />
+		      		<IfLastModified age="11d" />
+		     	</Delete> 
+    	</DefaultRolloverStrategy>
+	</RollingFile>
+  </Appenders>
+  
+  <Loggers>
+  	<Logger name="org.hibernate" level="off"/>
+  	<Logger name="org.jboss.logging" level="off"/>
+  	
+	<Logger name="org.springframework" level="off"/>
+    <Root level="all">
+      <AppenderRef ref="Console" />
+      <!-- <AppenderRef ref="RollingFile" /> -->
+      <AppenderRef ref="MySQLDatabase" />
+    </Root>
+  </Loggers>
+</Configuration>
