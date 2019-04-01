@@ -1,0 +1,115 @@
+package com.scc.casestatus.aspect;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.codehaus.jackson.map.ObjectMapper; 
+import org.aspectj.lang.annotation.Pointcut;
+import org.hibernate.type.TrueFalseType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMapping;	
+import com.scc.casestatus.logger.CustomLogMessage;
+
+@Aspect
+
+@Component
+public class AspectLogger {
+	static Logger mylogger = LogManager.getLogger(AspectLogger.class);
+	StringWriter sw=new StringWriter();
+	StringBuilder host_info=new StringBuilder();
+	
+	
+	
+	@Autowired(required=true)
+	HttpServletRequest httpreq;
+	
+	//Pointcut to execute on all the methods of classes in a package
+	@Pointcut("within(com.scc.casestatus.dao.*)")
+	public void loggingForDao(){
+		
+	}
+		
+	@Pointcut("within(com.scc.casestatus.service.*)")
+		public void loggingForService(){}
+		
+	@Pointcut("within(com.scc.casestatus.controller.*)")
+		public void loggingForController(){}
+	
+	
+	   
+	
+	@Before("loggingForDao() || loggingForService() || loggingForController()")
+	public void before(JoinPoint joinPoint){
+		ThreadContext.push("HOST_INFO",httpreq.getRemoteAddr());
+		 Date date= new Date();
+		 long time = date.getTime();
+		 java.sql.Timestamp tm=new java.sql.Timestamp(time);
+		 StringBuilder log_msg=new StringBuilder(setHostInfo()+"|"+joinPoint.getSignature()+"|called @ -"+tm);
+		 Object[] signatureArgs = joinPoint.getArgs();
+		   log_msg.append("with arg : (");
+		   for (Object signature: signatureArgs) {
+		      log_msg.append(signature);
+		   }
+		  // mylogger.info(log_msg.toString()+"|Ramesh");
+		   //mylogger.error(this.setHostInfo().toString()+"|"+"Demo"+"|"+log_msg.toString()+"|"+"Demo User");
+		   ThreadContext.pop();
+	}
+	
+	@After("loggingForDao() || loggingForService() || loggingForController()")
+	public void after(JoinPoint joinPoint){
+		 Date date= new Date();
+		 long time = date.getTime();
+		 java.sql.Timestamp tm=new java.sql.Timestamp(time);
+		 //clm=new CustomLogMessage(this.setHostInfo().toString(), "Demo", log_msg.toString(), "Demo User");
+		 //mylogger.warn(setHostInfo().toString()+"|"+joinPoint.getSignature()+"|Operation finished @ ::"+tm+"|"+"Ramesh");
+		// mylogger.debug(setHostInfo().toString()+"|"+joinPoint.getSignature()+"|Operation finished @ ::"+tm+"|"+"Ramesh");
+		 
+	}
+//	@AfterReturning(pointcut = "loggingForDao() || loggingForService() || loggingForController()", returning = "returnValue")
+//	public void loggingRepositoryMethods(JoinPoint joinPoint, Object returnValue) {
+//	    //String classMethod = this.getClassMethod(joinPoint);
+//		Date date= new Date();
+//		 long time = date.getTime();
+//		 java.sql.Timestamp tm=new java.sql.Timestamp(time);
+//	     if(returnValue !=null)
+//	     {
+//	   	 
+//	    		mylogger.info("<<<<<<<<<<<<<Method returned With Value: @ ::"+tm+" :: "+ returnValue.toString());
+//	     }
+//	     else
+//	     {
+//	    	 	mylogger.info("Method returned With Value: @ :: " + "No Value");
+//		 }
+//	     
+//	}
+	 @AfterThrowing (pointcut = "loggingForDao() || loggingForService()", throwing = "ex")
+	    public void logAfterThrowingAllMethods(Exception ex) throws Throwable
+	    {
+		 	 StackTraceElement ste[] = ex.getStackTrace();
+		 	ex.printStackTrace(new PrintWriter(sw));
+			 //sw.write(sw.toString());
+			 mylogger.error(setHostInfo().toString()+"|"+ste[0]+"|Exception in "+ex.getClass().getName()+":: " + sw.toString()+"|"+"Ramesh");
+			 ThreadContext.clearAll();
+	    }
+	@Pointcut("within(com.scc.casestatus.service.*)")
+	public void allMethodsPointcut(){}
+	public StringBuilder setHostInfo(){
+		StringBuilder host_info=new StringBuilder();
+		host_info.append(httpreq.getRemoteAddr());
+		//host_info.append(strong_o+"QUERY STRING : "+strong_c+httpreq.getQueryString()).append(br);
+		return host_info;
+	}
+}
