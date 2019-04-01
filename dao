@@ -1,0 +1,72 @@
+package log4jwebtracker.io.sql;
+
+import java.util.*;
+import java.sql.*;
+import org.apache.commons.dbcp2.BasicDataSource;
+public class LogDao {
+	private static BasicDataSource dataSource;
+	public static Connection getConnection() throws SQLException {
+	      if (dataSource == null) {
+	         dataSource = new BasicDataSource();
+	         dataSource.setUrl("jdbc:mysql://localhost:3306/logger");
+	         dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+	         dataSource.setUsername("root");
+	         dataSource.setPassword("root");
+	      }
+	      return dataSource.getConnection();
+	   }
+	
+	public static StringBuilder getAllLos(String from_date,String to_date){
+		ResultSet rs=null;
+		StringBuilder sb=new StringBuilder();
+		try{
+			Connection con=LogDao.getConnection();
+
+			PreparedStatement ps=con.prepareStatement("select * from APP_LOGS where ENTRY_DATE BETWEEN '"+from_date+"' and '"+to_date+"'");
+			//PreparedStatement ps=con.prepareStatement("select * from APP_LOGS where LOG_ID='458ff66c-5445-11e9-9d3c-b083fe956a1d'");
+			rs=ps.executeQuery();
+			int id=1;
+			while(rs.next()){
+				StringTokenizer st = new StringTokenizer(rs.getString("MESSAGE"), "|");
+				sb.append("<tr><td style='width:5%'>"+rs.getTimestamp("ENTRY_DATE")+"</td>" 
+				+ "<td style='width:5%'>"+rs.getString("LOG_LEVEL")+"</td>");
+				int a=4;
+				while (st.hasMoreTokens()) {
+						StringBuilder stl=new StringBuilder();
+						if(a==4){
+							stl.append("style='width:10%'");
+						}else if(a==3){
+							stl.append("style='width:15%; word-wrap:anywhere'");
+						}else if(a==2){
+							stl.append("style='width:60%; word-wrap: break-word;max-width: 400px;'");
+						}else if(a==1){
+							stl.append("style='width:12%'");
+						}
+						sb.append("<td "+stl+">");
+							if(a==2){
+								StringBuilder str=new StringBuilder(st.nextToken());
+								if(str.toString().length()>300)
+								{
+										System.out.println("===="+str.length());
+										sb.append(str.substring(0, 250)+"<span id=\"dots"+ id+"\">...</span><span class='more' id=\"more"+id+"\">"
+										+str.substring(251, str.length())
+										+ "</span><button onclick=\"myFunction('"+id+"')\" id=\""+id+"myBtn\">View more..</button>");
+								}else{
+									sb.append(str);
+								}
+							}else{
+								sb.append(st.nextToken());
+							}
+						sb.append("</td>");	
+						a--;
+				}
+				id++;
+				sb.append("</tr>");
+			}
+			
+			con.close();
+		}catch(Exception e){e.printStackTrace();}
+		
+		return sb;
+	}
+}
