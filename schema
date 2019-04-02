@@ -1,0 +1,13 @@
+CREATE TABLE `APP_LOGS` (
+  `LOG_ID` varchar(100) NOT NULL,
+  `ENTRY_DATE` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `LOGGER` varchar(100) DEFAULT NULL,
+  `LOG_LEVEL` varchar(100) DEFAULT NULL,
+  `MESSAGE` longtext,
+  `EXCEPTION` text,
+  `host_info` text,
+  `user_name` text,
+  `error_type` varchar(500) DEFAULT NULL,
+  `source` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`LOG_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
