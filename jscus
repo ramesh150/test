@@ -7,7 +7,7 @@ $( document ).ready(function() {
 		$('#loading-mask').show();
 			var data = {date_from: $('#from_date').val()};
 						data.date_to=$('#to_date').val();
-						
+						data.level=$('#level').val();
 			$.ajax(
 					{	url: '/CaseStatus/tracklog/taillog',
 						data: data,dataType: 'text',
@@ -35,12 +35,14 @@ function myFunction(id) {
 	  var dots = document.getElementById("dots"+id);
 	  var moreText = document.getElementById("more"+id);
 	  var btnText = document.getElementById(id+"myBtn");
-
 	  if (dots.style.display === "none") {
+		  $("#mesdiv"+id).animate({height:'53'})  
 	    dots.style.display = "inline";
 	    btnText.innerHTML = "View more"; 
 	    moreText.style.display = "none";
+	    
 	  } else {
+		$("#mesdiv"+id).animate({height:'400'})  
 	    dots.style.display = "none";
 	    btnText.innerHTML = "Read less"; 
 	    moreText.style.display = "inline";
