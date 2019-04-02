@@ -4,7 +4,7 @@
 
     <!-- Console Appender -->
     <Console name="Console" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss a} %x{HOST_INFO} %-5level %logger{36} - %msg%n" />
+      <PatternLayout pattern="%d{yyyy-MMM-dd HH:mm:ss a} %X{HOST_INFO} %-5level %logger{36} - %msg%n" />
     </Console>
 
     <!-- JDBC Appender -->
@@ -16,9 +16,10 @@
          <Column name="LOG_LEVEL" pattern="%level" />
          <Column name="MESSAGE" pattern="%m" />
          <Column name="EXCEPTION" pattern="%throwable " />
-         <!-- <Column name="host_info" pattern="%x{HOST_INFO}" />
-         <Column name="user_name" pattern="%x{user_name}" />
-         <Column name="error_type" pattern="%x{error_type}" /> -->
+         
+         <Column name="host_info" pattern="%X{HOST_INFO}" />
+         <Column name="user_name" pattern="%X{USER}" />
+         <Column name="source" pattern="%X{SOURCE}" /> -->
     </JDBC>
    
    <!-- RollingFile Appender -->
@@ -44,10 +45,10 @@
   </Appenders>
   
   <Loggers>
-  	<Logger name="org.hibernate" level="off"/>
-  	<Logger name="org.jboss.logging" level="off"/>
+  	<Logger name="org.hibernate" level="error"/>
+  	<Logger name="org.jboss.logging" level="error"/>
   	
-	<Logger name="org.springframework" level="off"/>
+	<Logger name="org.springframework" level="error"/>
     <Root level="all">
       <AppenderRef ref="Console" />
       <!-- <AppenderRef ref="RollingFile" /> -->
