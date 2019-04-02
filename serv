@@ -186,7 +186,7 @@ public class TrackerServlet extends HttpServlet {
 									+ "</tr></thead>");
 					sb_table.append("<tbody>");
 					
-					sb_table.append(LogDao.getAllLos(request.getParameter("date_from"),request.getParameter("date_to")).toString());
+					sb_table.append(LogDao.getAllLos(request.getParameter("date_from"),request.getParameter("date_to"),request.getParameter("level")).toString());
 					sb_table.append("</tbody></table>");
 					
 				} catch(Exception e) {
@@ -255,8 +255,6 @@ public class TrackerServlet extends HttpServlet {
 				+ "<script type=\"text/javascript\" src=\"");
 		sb.append((String) request.getAttribute("baseAction"));
 		sb.append("/js/jquery.wordWrap.js\"></script>"
-				
-				
 				+"<script type=\"text/javascript\" src=\""
 				+(String) request.getAttribute("baseAction")
 				+"/js/jquery-ui.min.js\"></script>"
@@ -288,7 +286,18 @@ public class TrackerServlet extends HttpServlet {
 		sb.append("</div>");
 		sb.append("<div class='form-group'>");
 		sb.append("<label for=\"Date-To\">To : </label>");
-		sb.append("<input id='to_date' type='text' name='to_date' class='datepicker form-control' /> </div>"
+		sb.append("<input id='to_date' type='text' name='to_date' class='datepicker form-control' /></div>");
+		sb.append("<div class='form-group'>"
+				+ "<label for=\"Select Level\"> Level : </label>"
+				+"<select name='level' id='level'>"
+				+ "<option value='ALL'>ALl</option>"
+				+ "<option value='INFO'>Info</option>"
+				+ "<option value='ERROR'>Error</option>"
+				+ "<option value='DEBUG'>Debug</option>"
+				+ "<option value='TRACE'>Trace</option>"
+				+ "<option value='FATAL'>Fatal</option>"
+				+ "</select>"
+				+ "</div>"
 					+ "<button type=\"button\" class='btn btn-default' id=\"refresh\">Refresh</button>"
 					+ "</form></div><div style=\"overflow: hidden;\">"
 					+ "<div id=\"loading-mask\" style=\"display: none;\"></div></div>"
