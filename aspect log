@@ -1,118 +1,402 @@
-package com.scc.casestatus.aspect;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Date;
+package com.scc.nonscc.main;
 
-import javax.servlet.http.HttpServletRequest;
-import org.apache.logging.log4j.CloseableThreadContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.AfterThrowing;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.codehaus.jackson.map.ObjectMapper; 
-import org.aspectj.lang.annotation.Pointcut;
-import org.hibernate.type.TrueFalseType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestMapping;	
+import java.io.ByteArrayInputStream;
+import java.io.File;
 
-@Aspect
+import java.io.FileOutputStream;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
-public class AspectLogger {
-	static Logger mylogger = LogManager.getLogger(AspectLogger.class);
-	StringWriter sw=new StringWriter();
-	StringBuilder host_info=new StringBuilder();
-	
-	
-	
-	@Autowired(required=true)
-	HttpServletRequest httpreq;
-	
-	//Pointcut to execute on all the methods of classes in a package
-	@Pointcut("within(com.scc.casestatus.dao.*)")
-	public void loggingForDao(){
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.receivers.db.dialect.HSQLDBDialect;
+import org.apache.solr.client.solrj.SolrClient;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document.OutputSettings.Syntax;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Entities.EscapeMode;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.parser.Parser;
+import org.jsoup.select.Elements;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+
+import net.sf.saxon.functions.Collection;
+import scc.tagger.TagResponse.Tag;
+import service.SolrService;
+import service.SolrServiceImpl;
+
+public class AddTag {
+	org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AddTag.class);
+	public void addNotFound(String file,String s_tag,String e_tag, List<Tag> lt,StringBuilder sb) {
+		System.out.println(file);
+		SolrService ss=new SolrServiceImpl();
+		Boolean found=false;
+		Boolean citref=false;
+		try {
+																							
+		int end_temp=0;
 		
+		Deque<String> stl = new ArrayDeque<String>();
+		
+		org.jsoup.nodes.Document docs = Jsoup.parse(sb.toString(), "", Parser.xmlParser());
+		docs.outputSettings().prettyPrint(false).syntax(Syntax.html).escapeMode(EscapeMode.xhtml);
+		docs.outputSettings().charset("UTF-8");
+		Elements tags_citref = docs.select("citref");
+		Elements tags_sccref = docs.select("sccref");
+		Elements tags_scccriref = docs.select("scccriref");
+		Elements tags_scclnsref = docs.select("scclnsref");
+		Elements tags_scccivil = docs.select("scccivil");
+		Elements tags_scctaxref = docs.select("scctaxref");
+		Elements tags_notfound = docs.select(s_tag.replace("<","").replace(">", ""));
+		tags_citref.addAll(tags_sccref);
+		tags_citref.addAll(tags_scccriref);
+		tags_citref.addAll(tags_scclnsref);
+		tags_citref.addAll(tags_scccivil);
+		tags_citref.addAll(tags_scctaxref);
+		tags_citref.addAll(tags_notfound);
+		int previousLength=sb.length();
+		int newLength=sb.length();
+		int deduction=0;
+		Boolean multiple=false;
+		
+				
+		Set<String> set=new HashSet<String>();
+		List<String> objlist = tags_citref.stream()
+			    .map(Element::toString)
+			    .collect(Collectors.toList());
+		if(objlist.size()>=1) {
+			multiple=true;
+		}
+		set.addAll(objlist.stream().distinct().collect(Collectors.toSet()));
+		List<String> patternList=new CitationRegex().getRegexList();
+		List<SortedMap<Integer, String>> listSortedMap=new ArrayList<SortedMap<Integer, String>>();
+		List<Tag> ts = lt.stream().map(p -> {
+			if (p.getMatchText().length()>7)
+				return p;
+			return null;
+		}).collect(Collectors.toList());
+		List rm=new ArrayList<Object>();
+		rm.add(null);
+		ts.removeAll(rm);
+		int i=0;
+		int s=0;
+		int e=0;
+		String mtext="";
+		do{
+			if(ts.size()<=0) {
+				s=0;
+				e=sb.length();
+			}else if(i<ts.size()-1){
+				s=ts.get(i).getStart();
+				e=ts.get(i).getEnd();
+				mtext=ts.get(i).getMatchText();
+				if(previousLength!=newLength) {
+					s=s+(newLength-previousLength);
+					e=e+(newLength-previousLength);
+				}
+				for(String ele1:set) {
+						Element ele = Jsoup.parse(ele1, "", Parser.xmlParser());
+						if(ele.getElementsByAttribute("cit")!=null && ele.getElementsByAttribute("cit").toString().contains(ts.get(i).getMatchText())) {
+							citref=true;
+								if(multiple==true) {
+									s+=2+ele.text().length();
+								}
+								for (TextNode node : ele.textNodes()) {
+									
+							        node.remove(); 
+							    }
+								if(ele.toString().endsWith("</citref>")) {
+									deduction=ele.toString().replace("</citref>", "").length();
+									s-=deduction;
+									
+									e+="</citref>".length();
+									
+								}else if(ele.toString().endsWith("</sccref>")) {
+									deduction=ele.toString().replace("</sccref>", "").length();
+									s-=deduction;
+									e+="</sccref>".length();
+								}else if(ele.toString().endsWith("</scccriref>")) {
+									deduction=ele.toString().replace("</scccriref>", "").length();
+									s-=deduction;
+									e+="</scccriref>".length();
+								}else if(ele.toString().endsWith("</scclnsref>")) {
+									deduction=ele.toString().replace("</scclnsref>", "").length();
+									s-=deduction;
+									e+="</scclnsref>".length();
+								}else if(ele.toString().endsWith("</scccivil>")) {
+									deduction=ele.toString().replace("</scccivil>", "").length();
+									s-=deduction;
+									e+="</scccivil>".length();
+								}else if(ele.toString().endsWith("</scctaxref>")) {
+									deduction=ele.toString().replace("</scctaxref>", "").length();
+									s-=deduction;
+									e+="</scctaxref>".length();
+								}
+								
+							//s-=1;
+							s-=deduction;
+						}
+					}
+					if(citref==false ) {
+						
+						boolean isBalanced=checkBalancedBrackets(mtext);
+						if(!isBalanced) {
+							char prevStart=sb.charAt(s-1);
+							char nextEnd=sb.charAt(e);
+							if((prevStart=='('|| prevStart=='[') && (nextEnd==')'|| nextEnd==']')) {
+								isBalanced=checkBalancedBrackets(prevStart+mtext+nextEnd);
+								if(isBalanced) {
+									s=s-1;
+									e=e+1;
+								}
+							}
+							 if(!isBalanced && (prevStart=='('|| prevStart=='[')) {
+								 isBalanced= checkBalancedBrackets(prevStart+mtext);
+								if(isBalanced) {
+									s=s-1;
+								}
+							}
+							 if(!isBalanced && (nextEnd==')'|| nextEnd=='}')) {
+								 isBalanced= checkBalancedBrackets(mtext+nextEnd);
+								 if(isBalanced) {
+									 e=e+1;
+								 }
+							 }
+							if(!isBalanced) {
+							//LOGGER.error("NOT TAGGED :"+mtext);
+								continue;
+							}
+						}
+						
+					}else {
+						s+=deduction;
+					}
+			}
+//						if(i==ts.size()-1 && end_temp<sb.length()) {
+//							s=end_temp;
+//							end_temp=sb.length();
+//						}
+						String missing_cita="";
+						if((s-end_temp) >=5) {
+							missing_cita=sb.substring(end_temp,s);
+							missing_cita.length();
+							SortedMap<Integer, String> sm = new TreeMap<Integer, String>();
+							for(String sss:patternList){
+								Pattern pattern = Pattern.compile(sss);
+								 Matcher matcher = pattern.matcher(missing_cita);
+								
+							    while (matcher.find()) {
+								    int start=  	matcher.start();
+								    int end=  matcher.end();
+								    sm.put(matcher.start(), missing_cita.subSequence(start, end).toString());
+								}
+							} 
+							Set st = sm.entrySet();
+							if(st.size()>0) {
+								Iterator itr = st.iterator();
+								int temp_end_temp=end_temp;
+								int key=0;
+								while (itr.hasNext()) 
+							     { 
+							         Map.Entry m = (Map.Entry)itr.next(); 
+							         key = (Integer)m.getKey(); 
+							         String value = m.getValue().toString().replace("\\p{P}","");
+							         	 s=key+end_temp;
+							        	 e=s+value.length();
+							        	if(s-temp_end_temp<=5) {
+									    	stl.add("CurrentSet@#@#"+(s)+"@#@#"+(e)+"@#@#"+value.toLowerCase().replace("[^a-zA-Z]", ""));
+										}else {
+											stl.add("NewSet@#@#"+(s)+"@#@#"+(e)+"@#@#"+value.toLowerCase().replace("[^a-zA-Z]", ""));
+										}
+									 temp_end_temp=e;
+							     }
+								end_temp=e;
+								s+=missing_cita.length()-key;
+								e=ts.get(i).getEnd();
+								
+							}
+							if(mtext!=null && !mtext.equals("")) {
+								if(s-end_temp <=5) {
+									stl.add("CurrentSet@#@#"+(s)+"@#@#"+(e)+"@#@#"+ts.get(i).getMatchText().toString().toLowerCase().replace("[^a-zA-Z]", ""));
+								}else {
+									stl.add("NewSet@#@#"+(s)+"@#@#"+(e)+"@#@#"+ts.get(i).getMatchText().toString().toLowerCase().replace("[^a-zA-Z]", ""));
+								}
+								
+							}
+						}else if(s-end_temp <=5 && ts.size()-1>=i) {
+							stl.add("CurrentSet@#@#"+(s)+"@#@#"+(e)+"@#@#"+ts.get(i).getMatchText().toString().toLowerCase().replace("[^a-zA-Z]", ""));
+						}
+						if(e>=sb.length()) {
+							break;
+						}else {
+							s-=deduction;
+							end_temp=e;
+							newLength=sb.length();
+							deduction=0;
+							citref=false;
+							mtext="";
+						}
+						
+		//	}
+		//			if(i<=ts.size()-1 && end_temp<sb.length()) {
+				i++;
+		//			}
+		}while(i<=ts.size()-1);
+		System.out.println(Arrays.toString(stl.toArray())+"\n");
+		ArrayList<String> temp=new ArrayList<String>();
+		stl.add("NewSet");
+		Deque<ArrayList<String>> list_final= new ArrayDeque<ArrayList<String>>();	
+		for(String str:stl) {
+			if(str.contains("NewSet")) {
+				list_final.add(temp);
+				temp=new ArrayList<String>();
+			}
+			temp.add(str);
+		}
+		
+		int st=0;
+		int en=0;
+		for(List<String> lst:list_final) {
+			found=false;
+			if(lst.size()>0) {
+				if(lst.stream().anyMatch(n -> n.contains("online")) || lst.stream().anyMatch(n -> n.contains("scc"))) {
+					continue;
+				}else {
+					found=true;
+					String[] text=lst.get(0).toString().split("@#@#");
+					String[] text_last=lst.get(lst.size()-1).toString().split("@#@#");
+					
+					sb.insert((Integer.parseInt(text[1])+st), s_tag);
+					sb.insert((Integer.parseInt(text_last[2])+(en+s_tag.length())), e_tag);
+					//System.out.println((Integer.parseInt(text[1])+st)+"---"+(Integer.parseInt(text_last[2])+en));
+				}
+				st+=s_tag.length()+e_tag.length();
+				en+=s_tag.length()+e_tag.length();
+			}
+			
+		}
+			if(found==true) {
+				System.out.println(file.toString());
+			}
+//			String[] spl=file.split("/");
+//			if(!(new File("/home/rameshchandra/Documents/added/"+spl[spl.length-2]).exists())) {
+//				new File("/home/rameshchandra/Documents/added/"+spl[spl.length-2]).mkdir();
+//			}
+//			FileOutputStream fos = new FileOutputStream("/home/rameshchandra/Documents/added/"+spl[spl.length-2]+"/"+spl[spl.length-1]);
+			FileOutputStream fos;
+			
+				fos = new FileOutputStream(file);
+				fos.write(sb.toString().replace("$@#$", "&").getBytes());
+				fos.flush();
+				fos.close();
+	
+			} catch (Exception e1) {
+				LOGGER.error("Exception Occoured : ",e1);
+			}
+			
+			found=false;
+		}
+		
+	
+public boolean checkBalancedBrackets(String matchText) {
+
+	Stack<Character> st = new Stack<>();
+	if (matchText.isEmpty()) {
+		return true;
+	} else {
+		for (int i = 0; i < matchText.length(); i++) {
+			char c = matchText.charAt(i);
+			if (c == '{' || c == '(' || c == '[') {
+				st.push(c);
+			}
+
+			if (!st.empty() && ((c == '}' && st.peek() == '{') || (c == ')' && st.peek() == '(')
+					|| (c == ']' && st.peek() == '['))) {
+				st.pop();
+			} else if (c == '}' || c == ')' || c == ']') {
+				st.push(c);
+			}
+
+		}
+		if (st.isEmpty()) {
+			// System.out.println("balanced");
+			return true;
+		} else {
+			// System.out.println("not balanced");
+			return false;
+		}
 	}
-	
-	@Pointcut("within(com.scc.casestatus.service.*)")
-		public void loggingForService(){}
-		
-	@Pointcut("within(com.scc.casestatus.controller.*)")
-		public void loggingForController(){}
-//	@Before("loggingForDao() || loggingForService() || loggingForController()")
-//	public void before(JoinPoint joinPoint){
-//		ThreadContext.push("HOST_INFO",httpreq.getRemoteAddr());
-//		 Date date= new Date();
-//		 long time = date.getTime();
-//		 java.sql.Timestamp tm=new java.sql.Timestamp(time);
-//		 StringBuilder log_msg=new StringBuilder(setHostInfo()+"|"+joinPoint.getSignature()+"|called @ -"+tm);
-//		 Object[] signatureArgs = joinPoint.getArgs();
-//		   log_msg.append("with arg : (");
-//		   for (Object signature: signatureArgs) {
-//		      log_msg.append(signature);
-//		   }
-//		   mylogger.info(log_msg.toString());
-//		   ThreadContext.pop();
-//	}
-	
-//	@After("loggingForDao() || loggingForService() || loggingForController()")
-//	public void after(JoinPoint joinPoint){
-//		 Date date= new Date();
-//		 long time = date.getTime();
-//		 java.sql.Timestamp tm=new java.sql.Timestamp(time);
-//		 mylogger.info(joinPoint.getSignature()+" Operation finished @ ::"+tm);
-//	}
-//	@AfterReturning(pointcut = "loggingForDao() || loggingForService() || loggingForController()", returning = "returnValue")
-//	public void loggingRepositoryMethods(JoinPoint joinPoint, Object returnValue) {
-//	    //String classMethod = this.getClassMethod(joinPoint);
-//		Date date= new Date();
-//		 long time = date.getTime();
-//		 java.sql.Timestamp tm=new java.sql.Timestamp(time);
-//	     if(returnValue !=null)
-//	     {
-//	    		mylogger.info("message here");
-//	     }
-//	     else
-//	     {
-//	    	 	mylogger.info("Method returned With Value: @ :: " + "No Value");
-//		 }
-//	     
-//	}
-	 @AfterThrowing (pointcut = "loggingForDao() || loggingForService()", throwing = "ex")
-	    public void logAfterThrowingAllMethods(Exception ex) throws Throwable
-	    {
-		
-		try (CloseableThreadContext.Instance level1 =
-				 CloseableThreadContext.put("HOST_INFO", setHostInfo().toString())) {
-			 	
-			 	LdapUserDetailsImpl ldapDetails = (LdapUserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-				String dn = ldapDetails.getDn();
-				int beginIndex = dn.indexOf("cn=") + 3;
-				int endIndex = dn.indexOf(",");	
-			 	
-				 CloseableThreadContext.put("USER",dn.substring(beginIndex, endIndex));	
-			 	 StackTraceElement ste[] = ex.getStackTrace();
-			 	 CloseableThreadContext.put("SOURCE",ste[0].toString());
-			 	 ex.printStackTrace(new PrintWriter(sw));
-			 	 mylogger.error(sw.toString());
-			 ThreadContext.clearAll();
-		 }catch(Exception e){}
-	    }
-	@Pointcut("within(com.scc.casestatus.service.*)")
-	public void allMethodsPointcut(){}
-	public StringBuilder setHostInfo(){
-		StringBuilder host_info=new StringBuilder();
-		host_info.append(httpreq.getRemoteAddr());
-		return host_info;
+
+}
+	private List<String> getPatternList(){
+		Connection conn=null;
+		String dbURL = "jdbc:sqlserver://192.168.0.43;databaseName=CaseStatusDevelop";
+		String user = "JavaUserDevelop";
+		String pass = "Singar@123";
+		List<String> list=new ArrayList<String>();
+		try {
+			 Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver").newInstance();
+			conn = DriverManager.getConnection(dbURL, user, pass);
+			if (conn != null) {
+				Statement stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery("select distinct journal__mask_value from CaseStatusDevelop.dbo.Journal order by journal__mask_value");
+				while (rs.next()) {
+					list.add(rs.getString("journal__mask_value"));
+				}
+		   }
+		} catch (SQLException | InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return list;
 	}
+	public static String printMatches(String text,String citation) {
+				String regex=	Pattern.quote(citation).replaceAll("(\\[|\\()", "\\\\(*\\\\[*").replaceAll("(\\)|\\])", "\\\\)*\\\\]*").replace("\\Q","" ).replace("\\E","").replace(".", "(\\.|\\s+)?");
+				//	System.out.println(regex);
+			    Pattern pattern = Pattern.compile(regex);
+			    Matcher matcher = pattern.matcher(text);
+			    
+			    if (matcher.find()) {
+			    int  i=matcher.groupCount();
+			    int start=  	matcher.start();
+			    int end=  matcher.end();
+			    	
+			        if(text.substring(start, end).equalsIgnoreCase(citation)) {
+			        	System.out.println("matching :"+text.substring(start, end)+"  and  "+citation);
+			        }
+			        
+			        
+			      
+			 
+			
+			    }
+			    return text;
+	}
+
 }
