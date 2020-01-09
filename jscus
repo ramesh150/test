@@ -1,50 +1,224 @@
-$( document ).ready(function() {
-	$( function() {$( ".datepicker" ).datepicker({	changeMonth: true, changeYear: true,dateFormat: 'yy-mm-dd' });} );
-	$('#refresh').click( function() {
-		
-		$('#loading-mask').text('Loading...');
-		$('#loading-mask').removeClass('error');
-		$('#loading-mask').show();
-			var data = {date_from: $('#from_date').val()};
-						data.date_to=$('#to_date').val();
-						data.level=$('#level').val();
-			$.ajax(
-					{	url: '/CaseStatus/tracklog/taillog',
-						data: data,dataType: 'text',
-						cache: false,
-						success: function(data) 
-						{
-								if(data.indexOf('TrackerError')==-1) 
-									{
-										$('#loading-mask').hide();
-										$('#logText').html(data);
-										$('#logText').get(0).scrollTop = $('#logText').get(0).scrollHeight;
-									} else 
-									{
-										$('#loading-mask').addClass('error');
-										$('#loading-mask').text('Error: Check the log manually');
-									}
-								 	
-						},
-						
-					});
+package com.scc.nonscc.main;
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class CitationRegex {
+	public List getRegexList() {
+	List<String> ListRegex  =new ArrayList<String>();
+	ListRegex.add("\\((((I)|(II)|(III)|(IV)|(V)|(VI)|(VII)|(VIII)|(IX)|(X))|([0-9]))\\)");
 	
-	    });
-});
-function myFunction(id) {
-	  var dots = document.getElementById("dots"+id);
-	  var moreText = document.getElementById("more"+id);
-	  var btnText = document.getElementById(id+"myBtn");
-	  if (dots.style.display === "none") {
-		  $("#mesdiv"+id).animate({height:'53'})  
-	    dots.style.display = "inline";
-	    btnText.innerHTML = "View more"; 
-	    moreText.style.display = "none";
-	    
-	  } else {
-		$("#mesdiv"+id).animate({height:'400'})  
-	    dots.style.display = "none";
-	    btnText.innerHTML = "Read less"; 
-	    moreText.style.display = "inline";
-	  }
-	}			
+	//air citations
+	String air="SC";
+	ListRegex.add("(AIR) (1|2)[0-9]{3,3} "+ air +" ([1-9][0-9]{0,8})");
+	
+	//air AIR Bom R (Volume)
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) AIR Bom R [1-9][0-9]*");
+	
+	//AIR Jhar R
+	ListRegex.add("^(1|2)([0-9][0-9][0-9]) AIR Jhar R [1-9][0-9]*");
+	
+	//AIR Jhar R (Volume)
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) AIR Jhar R [1-9][0-9]*");
+	//AIR Kant R (Volume)
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) AIR Kant R [1-9][0-9]*");
+	
+	//aircc
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) AIR CC [1-9][0-9]*");
+	
+	//CPJ
+		ListRegex.add("\\((1|2)([0-9][0-9][0-9])\\) ([1-9][0-9]*) CPJ ([1-9][0-9]?)");
+		
+		
+	//aic
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) AIC [1-9][0-9]*");
+	
+	//AIHC':
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) AIHC [1-9][0-9]*");
+    //Supp All LJ':
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) Supp All LJ [1-9][0-9]*");
+	//Cri LJ
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) Cri LJ [1-9][0-9]*");
+    
+	//ALR (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) ALR [1-9][0-9]*");
+    //ACC (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) ACC [1-9][0-9]*");
+    //Supp ACC':
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) Supp ACC [1-9][0-9]*");
+    //ARC':
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) ARC [1-9][0-9]*");
+    //ARC (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) ARC(\\s[1-9][0-9]{0,3}|\\s[1-9][0-9]{0,3})");
+    //AWC':
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) AWC [1-9][0-9]*");
+    //AWC (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) AWC [1-9][0-9]*");
+    //Supp AWC':
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) Supp AWC [1-9][0-9]*");
+    //AP LJ (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) AP LJ [1-9][0-9]*");
+    //ALD (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) ALD [1-9][0-9]*");
+    //ALT':
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) ALT [1-9][0-9]*");
+    //ALT (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) ALT [1-9][0-9]*");
+    //An WR (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) An WR [1-9][0-9]*");
+    //Arb LR (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) Arb LR [1-9][0-9]*");
+    //Supp Arb LR':
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) Supp Arb LR [1-9][0-9]*");
+    //Supp Arb LR (Volume)':
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) Supp (\\([1-9][0-9]*\\)) Arb LR [1-9][0-9]*");
+    //BC':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) BC [1-9][0-9]*");
+    //Beng LR (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) Beng LR [1-9][0-9]*");
+    //Supp Beng LR':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) Supp Beng LR [1-9][0-9]*");
+    //L Beng LR (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) L Beng LR [1-9][0-9]*");
+    //SCR Beng (Taylor)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\-([0-9][0-9]?[0-9]?[0-9]?)\\) Tay [1-9][0-9]* \\(Bengal\\)");
+    //SCR Beng (Montriou)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\-([1-9][0-9][0-9][0-9])\\) Mont [1-9][0-9]* \\(SC Bengal\\)");
+    //PCC':
+//	ListRegex.add(/^\((1|2)[0-9][0-9][0-9]\-([0-9][0-9]?[0-9]?[0-9]?)\) PCC [1-9][0-9]* ?(\(I|II|III|IV|V|VI|VII|VIII|IX|X|[0-9]+\))? \(Cal CSC\)$/);
+//    if (tbmask.search(pattern) == -1) { showAlert('Invalid Citation Format!'); return false; } else return true;
+//case 'BLJR':
+//    pattern = new RegExp(/^\((1|2)[0-9][0-9][0-9]\) ([1-9][0-9]?[0-9]?[0-9]?) BLJR [1-9][0-9]* ?(\(I|II|III|IV|V|VI|VII|VIII|IX|X|[0-9]+\))?$/);
+//    if (tbmask.search(pattern) == -1) { showAlert('Invalid Citation Format!'); return false; } else return true;
+//case 'BLJR (Volume)':
+//    pattern = new RegExp(/^\((1|2)[0-9][0-9][0-9]\) ([1-9][0-9]?[0-9]?[0-9]?) \(([1-9][0-9]?[0-9]?[0-9]?)\) BLJR [1-9][0-9]* ?(\(I|II|III|IV|V|VI|VII|VIII|IX|X|[0-9]+\))?$/);
+//    if (tbmask.search(pattern) == -1) { showAlert('Invalid Citation Format!'); return false; } else return true;
+//case 'BLJ':
+//    pattern = new RegExp(/^\((1|2)[0-9][0-9][0-9]\) ([1-9][0-9]?[0-9]?[0-9]?) BLJ [1-9][0-9]* ?(\(I|II|III|IV|V|VI|VII|VIII|IX|X|[0-9]+\))? \(JHC\)?$/);
+//    if (tbmask.search(pattern) == -1) { showAlert('Invalid Citation Format!'); return false; } else return true;
+//
+//case 'BLJ (Volume)':
+//    pattern = new RegExp(/^\((1|2)[0-9][0-9][0-9]\) ([1-9][0-9]?[0-9]?[0-9]?) BLJ [1-9][0-9]* ?(\(I|II|III|IV|V|VI|VII|VIII|IX|X|[0-9]+\))? \(PHC\)?$/);
+    //CHN':
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) CHN [1-9][0-9]*");
+    //CHN (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) CHN [1-9][0-9]*");
+    //Cal LT (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) Cal LT [1-9][0-9]*");
+    //Cal LJ (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) Cal LJ [1-9][0-9]*");
+    //CLT (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) CLT [1-9][0-9]*");
+    //CTR (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) CTR [1-9][0-9]*");
+    //E Cr N (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) E Cr N [1-9][0-9]*");
+    //FAC':
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) FAC [1-9][0-9]*");
+    //FAC (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) FAC [1-9][0-9]*");
+    //FAJ':
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) FAJ [1-9][0-9]*");
+    //GLH':
+	ListRegex.add("(1|2)([0-9][0-9][0-9]) GLH [1-9][0-9]*");
+    //GLH (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) GLH [1-9][0-9]*");
+    //GLR (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) GLR [1-9][0-9]*");
+    //GLR (Specific Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) \\(([1-9][0-9]?[0-9]?[0-9]?)\\) GLR [1-9][0-9]*");
+    //ICC (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) ICC [1-9][0-9]*");
+    //ILR (Patna)':
+	ListRegex.add("ILR \\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) Pat [1-9][0-9]*");
+    //JLJR (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) JLJR [1-9][0-9]*");
+    //KCCR (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) KCCR [1-9][0-9]*");
+    //PTC (Volume)':
+	ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) PTC [1-9][0-9]*");
+    //Supp PTC':
+			ListRegex.add("\\((1|2)[0-9][0-9][0-9]-([1-9][0-9]?[0-9]?[0-9]?)\\) Supp \\(([1-9][0-9]?[0-9]?[0-9]?)\\) PTC [1-9][0-9]*");
+    //PLJR':
+			ListRegex.add("(1|2)([0-9][0-9][0-9]) PLJR [1-9][0-9]*");
+    //PLJR (Volume)':
+			ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) PLJR [1-9][0-9]*");
+    //Supp PLJR':
+			ListRegex.add("(1|2)([0-9][0-9][0-9]) Supp PLJR [1-9][0-9]*");
+    //PLR Del':
+			ListRegex.add("PLR ?\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) Del [1-9][0-9]*");
+    //RLR':
+			ListRegex.add("(1|2)([0-9][0-9][0-9]) RLR [1-9][0-9]*");
+    //RLR (Volume)':
+			ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) RLR [1-9][0-9]*");
+    //STC (Volume)':
+			ListRegex.add("\\((1|2)[0-9][0-9][0-9]-([1-9][0-9]?[0-9]?[0-9]?)\\) ([1-9][0-9]?[0-9]?[0-9]?) STC [1-9][0-9]*");
+    //UP LJ (Volume)':
+			ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) UP LJ [1-9][0-9]*");
+    //VST (Volume)':
+			ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) VST [1-9][0-9]*");
+    //AIR Ajm':
+			ListRegex.add("AIR (1|2)([0-9][0-9][0-9]) Ajm [1-9][0-9]*");
+    //AIR GDD':
+			ListRegex.add("AIR (1|2)([0-9][0-9][0-9]) GDD [1-9][0-9]*");
+    //AIR Kutch':
+			ListRegex.add("AIR (1|2)([0-9][0-9][0-9]) Kutch [1-9][0-9]*");
+    //AIR Lah':
+			ListRegex.add("AIR (1|2)([0-9][0-9][0-9]) Lah [1-9][0-9]*");
+    //AIR Lower Burma':
+			ListRegex.add("AIR (1|2)([0-9][0-9][0-9]) Lower Burma [1-9][0-9]*");
+    //AIR Oudh':
+			ListRegex.add("AIR (1|2)([0-9][0-9][0-9]) Oudh [1-9][0-9]*");
+    //AIR Pepsu':
+			ListRegex.add("AIR (1|2)([0-9][0-9][0-9]) Pepsu [1-9][0-9]*");
+    //AIR Rang':
+			ListRegex.add("AIR (1|2)([0-9][0-9][0-9]) Rang [1-9][0-9]*");
+    //AIR Sind':
+			ListRegex.add("AIR (1|2)([0-9][0-9][0-9]) Sind [1-9][0-9]*");
+    //AIR Pesh':
+			ListRegex.add("AIR (1|2)([0-9][0-9][0-9]) Pesh [1-9][0-9]*");
+    //AIR Upper Burma':
+			ListRegex.add("AIR (1|2)([0-9][0-9][0-9]) Upper Burma [1-9][0-9]*");
+    //AIR VP':
+			ListRegex.add("AIR (1|2)([0-9][0-9][0-9]) VP [1-9][0-9]*");
+    //ILR Lah':
+			ListRegex.add("ILR \\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) Lah [1-9][0-9]*");
+    //ILR Lahore (Volume)':
+			ListRegex.add("ILR \\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) Lah [1-9][0-9]*");
+    //Comp Cas (CLB)':
+	//		ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) Comp Cas [1-9][0-9]* ?(\(I|II|III|IV|V|VI|VII|VIII|IX|X|[0-9]+\))? \(CLB\)?$/);
+//    if (tbmask.search(pattern) == -1) { showAlert('Invalid Citation Format!'); return false; } else return true;
+//case 'BC DRAT':
+//    pattern = new RegExp(/^\((1|2)[0-9][0-9][0-9]\) ([1-9][0-9]?[0-9]?[0-9]?) BC [1-9][0-9]* ?(\(I|II|III|IV|V|VI|VII|VIII|IX|X|[0-9]+\))? \(DRAT\)?$/);
+//    if (tbmask.search(pattern) == -1) { showAlert('Invalid Citation Format!'); return false; } else return true;
+//case 'BC DRT':
+//    pattern = new RegExp(/^\((1|2)[0-9][0-9][0-9]\) ([1-9][0-9]?[0-9]?[0-9]?) BC [1-9][0-9]* ?(\(I|II|III|IV|V|VI|VII|VIII|IX|X|[0-9]+\))? \(DRT\)?$/);
+//    if (tbmask.search(pattern) == -1) { showAlert('Invalid Citation Format!'); return false; } else return true;
+//case 'Comp Cas (IPAB)':
+//    pattern = new RegExp(/^\((1|2)[0-9][0-9][0-9]\) ([1-9][0-9]?[0-9]?[0-9]?) Comp Cas [1-9][0-9]* ?(\(I|II|III|IV|V|VI|VII|VIII|IX|X|[0-9]+\))? \(IPAB\)?$/);
+//    if (tbmask.search(pattern) == -1) { showAlert('Invalid Citation Format!'); return false; } else return true;
+//case 'PTC IPAB':
+//    pattern = new RegExp(/^\((1|2)[0-9][0-9][0-9]\) ([1-9][0-9]?[0-9]?[0-9]?) PTC [1-9][0-9]* ?(\(I|II|III|IV|V|VI|VII|VIII|IX|X|[0-9]+\))? \(IPAB\)?$/);
+//    if (tbmask.search(pattern) == -1) { showAlert('Invalid Citation Format!'); return false; } else return true;
+//'NLR SL':
+			ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) NLR [1-9][0-9]*");
+    //SL LR':
+			ListRegex.add("\\((1|2)[0-9][0-9][0-9]\\) ([1-9][0-9]?[0-9]?[0-9]?) Sri LR [1-9][0-9]*");
+    //SL LR(Specific Vol)':
+			ListRegex.add("\\((1|2)[0-9][0-9][0-9]-([0-9][0-9]?[0-9]?[0-9]?)-([0-9][0-9]?[0-9]?[0-9]?)\\) ([1-9][0-9]?[0-9]?[0-9]?) Sri LR [1-9][0-9]*");
+//    if (tbmask.search(pattern) == -1) { showAlert('Invalid Citation Format!'); return false; } else return true;
+//
+//case 'SCC OnLine NCLT':
+//   pattern = new RegExp(/^[1-9][0-9]{3,3}\s(SCC\sOnLine\sNCLT)(\s[1-9][0-9]{0,6}|\s[1-9][0-9]{0,3}\s\((I|II|III|IV|V|VI|[1-6])\)|\s[1-9][0-9]{0,3}\((I|II|III|IV|V|VI|[1-6])\))$/);
+//   if (tbmask.search(pattern) == -1) { showAlert('Invalid Citation Format!'); return false; } else return true;
+//
+//case 'SCC OnLine NCLAT':
+//   pattern = new RegExp(/^[1-9][0-9]{3,3}\s(SCC\sOnLine\sNCLAT)(\s[1-9][0-9]{0,6}|\s[1-9][0-9]{0,3}\s\((I|II|III|IV|V|VI|[1-6])\)|\s[1-9][0-9]{0,3}\((I|II|III|IV|V|VI|[1-6])\))$/);
+//   if (tbmask.search(pattern) == -1) { showAlert('Invalid Citation Format!'); return false; } else return true;
+    //Pattern pattern = Pattern.compile(regex);
+    //Matcher matcher = pattern.matcher("kladsfjklasjdfl (1996) 2 ALD 1139 adjfklajdklf adsfjklasd (2015) 155 AIC 171 adjkadfjkl");
+			return ListRegex;
+	} 
+}
+
