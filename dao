@@ -1,55 +1,214 @@
-package log4jwebtracker.io.sql;
-
-import java.util.*;
-import java.sql.*;
-import org.apache.commons.dbcp2.BasicDataSource;
-public class LogDao {
-	private static BasicDataSource dataSource;
-	public static Connection getConnection() throws SQLException {
-	      if (dataSource == null) {
-	         dataSource = new BasicDataSource();
-	         dataSource.setUrl("jdbc:mysql://localhost:3306/logger");
-	         dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-	         dataSource.setUsername("root");
-	         dataSource.setPassword("root");
-	      }
-	      return dataSource.getConnection();
-	   }
-	
-	public static StringBuilder getAllLos(String from_date,String to_date,String level){
-		ResultSet rs=null;
-		StringBuilder sb=new StringBuilder();
-		try{
-			Connection con=LogDao.getConnection();
-
-			PreparedStatement ps=con.prepareStatement("select * from APP_LOGS where ENTRY_DATE BETWEEN '"+from_date+"' and '"+to_date+"' and LOG_LEVEL=\""+level+"\" order by ENTRY_DATE desc");
-			//PreparedStatement ps=con.prepareStatement("select * from APP_LOGS where LOG_ID='458ff66c-5445-11e9-9d3c-b083fe956a1d'");
-			rs=ps.executeQuery();
-			int id=1;
-			while(rs.next()){
-				sb.append("<tr><td style='width:5%'>"+rs.getTimestamp("ENTRY_DATE")+"</td>" 
-				+ "<td style='width:5%'>"+rs.getString("LOG_LEVEL")+"</td>"
-				+ "<td style='width:10%'>"+rs.getString("host_info")+"</td>"
-				+ "<td style='width:15% width:15%; word-wrap:anywhere'>"+rs.getString("source")+"</td>"
-				+ "<td style='width:60% word-wrap: break-word;max-width: 400px;'>");
-				StringBuilder msg=new StringBuilder(rs.getString("MESSAGE")); 
-				if(msg.toString().length()>300)
-				{
-						sb.append("<div style='overflow-y: scroll;word-wrap: anywhere' id='mesdiv"+id+"'>");
-						sb.append(msg.substring(0, 250)+"<span id=\"dots"+ id+"\">...</span><span class='more' id=\"more"+id+"\">"
-						+msg.substring(251, msg.length())
-						+ "</span></div><button style='border: none;color: red;padding: 0px;background: transparent;' onclick=\"myFunction('"+id+"')\" id=\""+id+"myBtn\">View more..</button>");
-				}else{
-					sb.append(rs.getString("MESSAGE"));
-				}
-				sb.append("</td>"
-				+ "<td style='width:12%'>"+rs.getString("user_name")+"</td>");
-				sb.append("</tr>");
-				id++;
-			}
-			con.close();
-		}catch(Exception e){e.printStackTrace();}
-		
-		return sb;
-	}
+<?xml version="1.0" encoding="UTF-8" ?>
+<document>
+<body>
+    <p class="CR1_HELV" style="line-height: normal; margin-bottom: 0.0mm; text-align: left; text-indent: 0.0mm; word-break-inside: normal;"><Span style="font-weight: bold;">— Art.&nbsp;134<notfound>(2)</notfound> </Span><Span style="font-style: italic;">See</Span> Art.&nbsp;124</p>
+   <p class="PARTY" style="margin-bottom: 0.0mm; page-break-after: auto; text-align: left; word-break-inside: normal;">ram vs shyam, see <notfound>AIR 2006 SC 2446</notfound>,Ramesh chandra srivastava v. kaka <notfound>2018 Cri LJ 4754: (2018) 182 AIC 108:(2018) 127 ALR 237</notfound>, ramoo v. shyamoo <notfound>2018 Cri LJ 4754</notfound>, And Resorts (P) Ltd. v.Joy Kaliyavumkal,(2018) 2 SCC 636: (2018) 2 SCC (Civ) 271:  (2018) 1 CPJ 3: (2018) 1 CPR 87: (2018) 1 CPR 896</p>
+<p>Ram kumar v. shyam kumra <citref cit="(2016) 12 SCC 272" pub="SCC" match="yes" allowlink="yes" doi="JTXT-0002459333">(2016) 12 SCC 272</citref>: <citref cit="(2015) 376 ITR 456" pub="ITR" match="yes" allowlink="no">(2015) 376 ITR 456</citref></p>
+<p>H <notfound>(2016) 6 ALD 86</notfound>,WLLO HOW R YOU <notfound>2018 Cri LJ 4754</notfound> </p>
+<p><Span style="font-style: italic;">Mangalore Ganesh Beedi Works</Span> v. <Span style="font-style: italic;">CIT</Span>, <citref cit="(2016) 2 SCC 556" pub="SCC" match="yes" allowlink="yes" doi="JTXT-0000051603">(2016) 2 SCC 556</citref>: <citref cit="(2015) 378 ITR 640" pub="ITR" match="yes" allowlink="no">(2015) 378 ITR 640</citref>.</p>
+  
+</body>
+</document>
+{
+    "responseHeader": {
+        "status": 0,
+        "QTime": 80
+    },
+    "tagsCount": 14,
+    "tags": [
+        [
+            "startOffset",
+            463,
+            "endOffset",
+            479,
+            "matchText",
+            "AIR 2006 SC 2446",
+            "ids",
+            [
+                "JTXT-0000037167"
+            ]
+        ],
+        [
+            "startOffset",
+            647,
+            "endOffset",
+            662,
+            "matchText",
+            "2018) 2 SCC 636",
+            "ids",
+            [
+                "JTXT-0002795542"
+            ]
+        ],
+        [
+            "startOffset",
+            665,
+            "endOffset",
+            686,
+            "matchText",
+            "2018) 2 SCC (Civ) 271",
+            "ids",
+            [
+                "JTXT-0002795542"
+            ]
+        ],
+        [
+            "startOffset",
+            690,
+            "endOffset",
+            697,
+            "matchText",
+            "2018) 1",
+            "ids",
+            [
+                "JTXT-0002950387",
+                "JTXT-0002950388"
+            ]
+        ],
+        [
+            "startOffset",
+            706,
+            "endOffset",
+            720,
+            "matchText",
+            "2018) 1 CPR 87",
+            "ids",
+            [
+                "JTXT-0002795542"
+            ]
+        ],
+        [
+            "startOffset",
+            723,
+            "endOffset",
+            730,
+            "matchText",
+            "2018) 1",
+            "ids",
+            [
+                "JTXT-0002950387",
+                "JTXT-0002950388"
+            ]
+        ],
+        [
+            "startOffset",
+            785,
+            "endOffset",
+            801,
+            "matchText",
+            "2016) 12 SCC 272",
+            "ids",
+            [
+                "JTXT-0002459333"
+            ]
+        ],
+        [
+            "startOffset",
+            864,
+            "endOffset",
+            880,
+            "matchText",
+            "2016) 12 SCC 272",
+            "ids",
+            [
+                "JTXT-0002459333"
+            ]
+        ],
+        [
+            "startOffset",
+            905,
+            "endOffset",
+            922,
+            "matchText",
+            "2015) 376 ITR 456",
+            "ids",
+            [
+                "JTXT-0002459333"
+            ]
+        ],
+        [
+            "startOffset",
+            962,
+            "endOffset",
+            979,
+            "matchText",
+            "2015) 376 ITR 456",
+            "ids",
+            [
+                "JTXT-0002459333"
+            ]
+        ],
+        [
+            "startOffset",
+            1187,
+            "endOffset",
+            1202,
+            "matchText",
+            "2016) 2 SCC 556",
+            "ids",
+            [
+                "JTXT-0000051603"
+            ]
+        ],
+        [
+            "startOffset",
+            1265,
+            "endOffset",
+            1280,
+            "matchText",
+            "2016) 2 SCC 556",
+            "ids",
+            [
+                "JTXT-0000051603"
+            ]
+        ],
+        [
+            "startOffset",
+            1305,
+            "endOffset",
+            1322,
+            "matchText",
+            "2015) 378 ITR 640",
+            "ids",
+            [
+                "JTXT-0000051603"
+            ]
+        ],
+        [
+            "startOffset",
+            1362,
+            "endOffset",
+            1379,
+            "matchText",
+            "2015) 378 ITR 640",
+            "ids",
+            [
+                "JTXT-0000051603"
+            ]
+        ]
+    ],
+    "response": {
+        "numFound": 6,
+        "start": 0,
+        "docs": [
+            {
+                "id": "JTXT-0002950387"
+            },
+            {
+                "id": "JTXT-0002950388"
+            },
+            {
+                "id": "JTXT-0000037167"
+            },
+            {
+                "id": "JTXT-0002459333"
+            },
+            {
+                "id": "JTXT-0000051603"
+            },
+            {
+                "id": "JTXT-0002795542"
+            }
+        ]
+    }
 }
