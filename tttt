@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  
+  <style>
+  body{
+  font-size:smaller;
+  }
+  	.job_row{
+    border-bottom: 1px solid darkgrey;
+    margin: 0px 0px 10px 0px;
+}
+h5{
+	color:#404040;
+}
+li{
+	width:33%;
+}
+  </style>
+  </head>
+<body>
+
+<div class="container">
+  <h2>Toggleable Tabs</h2>
+  <br>
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link active" data-toggle="tab" href="#home">Jobs</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#menu1">Admit Card</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#menu2">Results</a>
+    </li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div id="home" class=" tab-pane active"><br>
+   
+  
+ <div class="row job_row">
+  	<div class="col-sm-12"><h3 style="color:darkgrey">Main title Lorem ipsum dolor sit amet</h3></div>
+    <div class="col-sm-3 border-right">
+      <h5 class="opening">Fee & Dates <i class="fa fa-check" aria-hidden="true" style="color:green"></i></h5>
+		
+      <p>Form Begin : 20/11/23, Edit : 31/21/12, End : 31/21/12
+      <br>Fee : GEN-Rs.500, OBC-200, SC/ST-0</p>
+      
+    </div>
+    <div class="col-sm-3 border-right">
+      <h5>Exam <i class="fa fa-exclamation-circle" style="font-size:25px"></i>
+</h5>        
+      <p>Written : 20/20/2020, TypeTest : not clear</p>
+      
+    </div>
+    <div class="col-sm-3 border-right">
+      <h5 class="">AdmitCard <i class="fa fa-exclamation-circle" style="font-size:25px;color:yellow;"></i>
+</h5>
+      <p>Not issued yet.</p>
+      
+      
+    </div>
+    <div class="col-sm-3">
+      <h5>Result <i class="fa fa-exclamation-circle" style="font-size:25px"></i>
+</h5>        
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+      
+    </div>
+  </div>
+
+  </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+	
